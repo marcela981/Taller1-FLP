@@ -25,6 +25,8 @@
 (newline)
 (display (invert '((2 1) ("Este" 3) ("el" "es") ("punto" "primer") (o W) (W o)))) ;((1 2) (3 Este) (es el) (primer punto) (W o) (o W))
 (newline)
+(display (invert '( (0 1) ("hola" 2) ))) ; ((1 0) (2 hola))
+(newline)
 (newline)
 
 ;Punto 4
@@ -44,10 +46,11 @@
 (newline)
 (display (filter-in string? '(a b u "univalle" "racket" "flp" 28 90 (1 2 3)))) ; ("univalle" "racket" "flp")
 (newline)
-(display (filter-in string? '(a b u (40 56) hi (a b c) (1 2 3))))
+(display (filter-in string? '(a b u (40 56) hi (a b c) (1 2 3)))) ;()
+(newline)
+(display (filter-in number? '(o o "1 2 3" 0 "94" hi (a b c) (1 2 3)))) ;(0)
 (newline)
 (newline)
-
 
 ;Punto 7
 ;La intención de este punto es calcular el producto cartesiano
@@ -63,6 +66,10 @@
 (newline)
 (display (cartesian-product '(p q r) '(5 6 7))) ;((p 5) (p 6) (p 7) (q 5) (q 6) (q 7) (r 5) (r 6) (r 7))
 (newline)
+(display (cartesian-product '(1 2 3) '("hola" "nuevo" "mundo")))
+(newline)
+(display (cartesian-product '(0 ) '(a b c 0))) ;((0 a) (0 b) (0 c) (0 0))
+(newline)
 (newline)
 
 ;Punto 10
@@ -72,16 +79,18 @@
 (define (up L) ; Se define up
   (cond
     [(null? L) empty]             ; Condición, si L está vacía, devuelve una lista vacía
-    [(not (pair? (car L)))        ; Si el primer elemento no es una lista
-     (cons (car L) (up (cdr L)))] ; Agrega el elemento a la salida y procesa el resto de la lista
-    [else                         ; y Si no, el primer elemento es una lista
-     (append (up (car L)) (up (cdr L)))])) ; Combina las salidas de procesar el primer elemento y el resto de la lista
+    [(list? (car L)) ; Si el primer elemento de L es una lista
+     (append (up (car L)) (up (cdr L)))] ; Llamamos recursivamente a up en el primer elemento y en el resto de la lista, luego concatenamos los resultados
+    [else ; Si el primer elemento de L no es una lista
+     (cons (car L) (up (cdr L)))])) ; Agregamos el primer elemento a la salida y llamamos recursivamente a up en el resto de la lista
+
 
 
 (display (up '((1 2) (3 4)))) ;(1 2 3 4)
 (newline)
 (display (up '((x (y)) z))) ;(x (y) z)
 (newline)
+(display (up '((1 x) (b o)))) ;(x (y) z)
 (newline)
 
 
@@ -106,4 +115,61 @@
 (newline)
 (display (operate (list *) '(4 5))) ; 20
 (newline)
+(display (operate (list - + - * -) '(0 10 10 3 2 6))) ; -12
+(newline)
+(display (operate (list - + - + *) '(10 2 68 8 20 0))) ; 0
+(newline)
+(newline)
+
+;Punto 16
+;En este caso se nos entrega una gramatica que tiene como función recibir parametros
+;Estos parametro son una operación binaria y retornan el resultado
+; las operaciones son: suma, resta y multiplicación
+;De este modo se pueden contruir expresiones binarias, esas expresiones pueden ser anidadas y se evaluan
+; Ejemplo: (2 suma (3 multiplica 4)) -> La expresión es valida y cae de forma general en el segundo caso.
+; Podemos ver que el ejemplo es una operación binaria, (que a su vez es un entero), seguido de una operación suma
+;Seguida de otra operación binaria (Que a su vez es un entero una operación y un enero)
+; La segunda operación binaria entre en el caso 4, que es una operación binaria, una operación de multiplicación seguido de un binario
+;De forma recursiva podesmo utilizar esta gramatica, por tanto el ejemplo es valido.
+;<OperacionB>::= <int>
+            ;::= (<OperacionB> ’suma <OperacionB>)
+            ;::= (<OperacionB> ’resta <OperacionB>)
+            ;::= (<OperacionB> ’multiplica <OperacionB>)
+;La gramatica nos indica que las operaciones binarias
+;Pueden ser enteros (un numero es una operación binaria)o...
+;Una operación binaria seguida de una operacón suma seguida de otra operación binaria (Se usa la suma para combinar las operaciones binarias)o...
+;Una operación binaria seguida de una operacón resta seguida de otra operación binaria (Se usa la resta para combinar las operaciones binarias)o...
+;Una operación binaria seguida de una operacón multiplicación seguida de otra operación binaria (Se usa la multiplicación para combinar las operaciones binarias)o...
+
+(define (Operar-binarias operacionB); Se define la operación binaria
+  (cond
+    [(number? operacionB) operacionB] ; Si operacionB es un número, simplemente devolvemos ese número
+    [(pair? operacionB) ; Si operacionB es una lista (operación binaria)
+     (let* ([operador (cadr operacionB)]
+            [operando1 (Operar-binarias (car operacionB))]
+            [operando2 (Operar-binarias (caddr operacionB))])
+       (cond
+         [(equal? operador 'suma) (+ operando1 operando2)]
+         [(equal? operador 'resta) (- operando1 operando2)]
+         [(equal? operador 'multiplica) (* operando1 operando2)]
+         [else ( "Operador no válido")]))]
+    [else ( "Operación no válida")])) ; En caso de entrada no válida
+
+
+(display (Operar-binarias 4)) ; 4
+(newline)
+(display (Operar-binarias '(2 suma 9))) ; 11
+(newline)
+(display (Operar-binarias '(2 resta 9))) ; -7
+(newline)
+(display (Operar-binarias '(2 multiplica 9))) ; 18
+(newline)
+(display (Operar-binarias '((2 multiplica 3) suma (5 resta 1)))) ; 10
+(newline)
+(display (Operar-binarias '( (2 multiplica (4 suma 1) )
+multiplica( (2 multiplica 4) resta 1 ) ) ) )  ; 70
+(newline)
+(display (Operar-binarias ' (2 suma (3 multiplica 4))))
+(newline)
+(display (Operar-binarias ' (2 suma (3 resta( 4 suma (0 multiplica 100)))))); 1
 (newline)
