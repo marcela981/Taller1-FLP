@@ -29,6 +29,18 @@
 (newline)
 (newline)
 
+;Punto 2
+;Contrato: l -> lista
+;Se necesita una función que reciba una lista y esta le agregue
+;un nivel más de parentesis a la lista l
+(define (down lst)
+  (cond
+    ((null? lst) '()) ; Caso base
+    ((list? (car lst))
+     (cons (down (car lst)) (down (cdr lst)))) ; Si es una lista anidada, llama recursivamente a down en el primer elemento (anidado) y al resto de la lista, y luego utiliza cons para construir una nueva lista que contenga el resultado de down en el elemento anidado y el resultado de down en el resto de la lista.
+    (else
+     (cons (list (car lst)) (down (cdr lst)))))) ; crea una nueva lista que contiene ese elemento en una lista (añadiendo paréntesis) y el resultado de down en el resto de la lista (llamada recursiva).
+
 
 ;; Punto 3
 ;; list-set :
@@ -88,6 +100,23 @@
 (display (filter-in number? '(o o "1 2 3" 0 "94" hi (a b c) (1 2 3)))) ;(0)
 (newline)
 (newline)
+
+;Punto 5
+;Contrato: p -> predicado, l -> lista
+;Se necesita una función que reciba dos argumentos, un predicado y una lista
+;la función debería retornar el indice del primer elemento que cumpla con el predicado
+(define (list-index p l)
+  ; Se declara una función auxiliar para llevar el contador del indice
+  (define (aux p l index)
+    (cond
+      ((null? l) #f)
+      ((p (car l)) index) ; Si el predicado se cumple devuelve el indice
+      (else (aux p (cdr l) (+ index 1))) ; Si no, continua la ejecución recursivamente
+      ))
+  (cond
+    ((null? l) #f)
+    (else (aux p l 0))
+    ))
 
 
 ;; Punto 6
@@ -149,6 +178,20 @@
 (newline)
 (newline)
 
+;Punto 8
+;Contrato f -> función unaria, l1 -> lista, l2 -> lista
+;Se necesita una función que reciba tres argumentos: una función unaria
+;y dos listas, la función debe retornar una lista de pares de l1 y l2 respectivamente
+;las cuales cumplan que el resultado de la función unaria sea igual al segundo elemento del par
+(define (mapping f l1 l2)
+  (cond
+    ((or (null? l1) (null? l2)) '()) ; Caso base
+    (else
+     (cond
+       ((equal? (f (car l1)) (car l2)) (cons (list (car l1) (car l2)) (mapping f (cdr l1) (cdr l2)))) ;Si la cabeza de l1 evaluada en la función unaria es igual a la cabeza de l2 entonces retorna los pares y continua la ejecución recursivamente
+       (else (mapping f (cdr l1) (cdr l2))))
+     )))
+
 
 ;; Punto 9
 ;; inversions :
@@ -207,6 +250,17 @@
 (display (up '((1 x) (b o)))) ;(x (y) z)
 (newline)
 
+
+;Punto 11
+;Contrato f -> función binaria, l1 -> lista, l2 -> lista
+;Se necesita una función que reciba tres entradas: una función binaria, y dos listas de igual tamaño
+;la función debe retornar una lista con la operación de las dos listas en su n-ésima posición 
+(define (zip f l1 l2)
+  (cond
+    ((or (null? l1) (null? l2)) '()) ; Caso base
+    (else
+     (cons (f (car l1) (car l2)) (zip f (cdr l1) (cdr l2)))) ; Construyo la lista con aplicando la función unaria a la cabeza de l1 y l2 respectivamente
+    ))
 
 
 ;; Punto 12
