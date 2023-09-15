@@ -29,6 +29,43 @@
 (newline)
 (newline)
 
+
+;; Punto 3
+;; list-set :
+;; Propósito:
+;; Procedimiento en el que una lista L, recibe un elemento x, se reemplaza en una posición n
+;; y devuelve una nueva lista similar a L pero con el elemento
+;; en la posición n (indexada desde cero) reemplazado por x.
+;;
+
+(define list-set
+  (lambda (l n x)
+    (letrec
+        (
+         (list-aux
+          (lambda (laux naux xaux acc)
+            (cond
+              [(eqv? laux '()) empty]
+              [(= acc naux) (cons xaux (list-aux (cdr laux) naux xaux (+ 1 acc)))]
+              [else (cons (car laux) (list-aux (cdr laux) naux xaux (+ 1 acc)))]
+              )
+            )
+          )
+         )
+      (list-aux l n x 0))
+    )
+  )
+;; Pruebas
+(display(list-set '(a b c d) 2 '(1 2)));; Retorna '(a b (1 2) d)
+(newline)
+
+(display(list-set '(a b c d) 1 '(1 2))); Retorna '(a '(1 2) c d)'
+(newline)
+
+(display(list-set '(apple banana cherry date) 2 '(x y z))) ; Retorna '(apple banana '(x y z) date)'
+(newline)
+
+
 ;Punto 4
 ;Se debe elaborar la función filter-in que recibe dos argumentos, predicado y lista
 ;La función retorna una lista que contiene los elementos que pertenecen a la lista y satisface el predicado
@@ -52,6 +89,46 @@
 (newline)
 (newline)
 
+
+;; Punto 6
+
+;; my-map :
+;; Propósito:
+;;   Aplica una función func a cada elemento de una lista lst y devuelve una nueva lista
+;;   que contiene los resultados de aplicar func a cada elemento de lst.
+(define (my-map func lst)
+  (if (null? lst)
+      '()
+      (cons (func (car lst))
+            (my-map func (cdr lst)))))
+
+;; swapper :
+;; Propósito:
+;; Intercambia las ocurrencias de dos elementos, E1 y E2, en una lista L.
+
+(define swapper
+  (lambda(E1 E2 L)
+  (define (swap x)
+    (cond
+      [(eq? x E1) E2]
+      [(eq? x E2) E1]
+      [else x]))
+
+  (my-map (lambda (x) (swap x)) L)))
+
+
+;; Pruebas
+
+(display (swapper '8 '1 '(1 2 3 5 4 6 8 7))) ; Retorna '(8 2 3 5 4 6 1 7'
+(newline)
+
+(display (swapper 'a 'b '(a b c d e))) ; Retorna '(b a c d e)'
+(newline)
+
+(display (swapper "apple" "banana" '("apple" "banana" "cherry" "date" "apple"))) ; Retorna '("banana" "apple" "cherry" "date" "banana")'
+(newline)
+
+
 ;Punto 7
 ;La intención de este punto es calcular el producto cartesiano
 ;Esto lo hace mediante dos listas de tuplas
@@ -72,6 +149,43 @@
 (newline)
 (newline)
 
+
+;; Punto 9
+;; inversions :
+;; Propósito: Calcular el número de inversiones en una lista de números
+;; Una inversión es un par de elementos (i, j) en la lista donde i < j y L[i] > L[j]. En otras palabras, una inversión ocurre cuando un número en una posición anterior en la lista es mayor que un número en una posición posterior. La función utiliza un enfoque recursivo para contar las inversiones en la lista.
+;;.
+(define (inversions L)
+  (define inv-count 0)
+  
+  (define (count-inversions x xs)
+    (if (null? xs)
+        0
+        (+ (if (< x (car xs)) 0 1) (count-inversions x (cdr xs)))))
+    
+  (define (count-inversions-list L)
+    (if (null? L)
+        0
+        (+ (count-inversions (car L) (cdr L))
+           (count-inversions-list (cdr L)))))
+  
+  
+  (set! inv-count (count-inversions-list L))
+  
+ 
+  inv-count)
+
+;; Pruebas
+(display (inversions '(2 4 1 3 5)));; Retorna 3
+(newline)
+
+(display (inversions '(1 2 3 4 5))) ; Retorna 0
+(newline)
+
+(display (inversions '(3 1 3 2 1))) ; Retorna 8
+(newline)
+
+
 ;Punto 10
 ;En este punto se desea elaborar una función up, que reciba una lista como entrada
 ;La función tiene como objetivo eliminar los parentesis de cada elemento del nivel más alto de la lista
@@ -91,6 +205,36 @@
 (display (up '((x (y)) z))) ;(x (y) z)
 (newline)
 (display (up '((1 x) (b o)))) ;(x (y) z)
+(newline)
+
+
+
+;; Punto 12
+;; filter-acum
+;; Propósito: Acumular valores dentro de un rango [a, b] basado en un filtro y una función de acumulación proporcionada.
+;;   Se itera desde 'a' hasta 'b', aplicando el filtro y la función de acumulación a los elementos adecuados.
+
+(define filter-acum
+  (lambda(a b f acum filter)
+    (define (iter i acc)
+    (if (> i b)
+        acc
+        (iter (+ i 1)
+              (if (filter i)
+                  (f i acc)
+                  acc))))
+  
+  (iter a acum)))
+
+
+;; Pruebas
+(display (filter-acum 1 15 + 0 even?)) ; Retorna 56
+(newline)
+
+(display (filter-acum 1 15 + 0 odd?)) ; Retorna 64
+(newline)
+
+(display (filter-acum 1 15 + 0 rational?)) ; Retorna 120
 (newline)
 
 
@@ -120,6 +264,36 @@
 (display (operate (list - + - + *) '(10 2 68 8 20 0))) ; 0
 (newline)
 (newline)
+
+
+;;Punto 15
+;; <tree> -> <pair>
+;; Proposito: Función que recibe un árbol y cuenta la cantidad de números pares e impares en ese árbol.
+(define count-odd-and-even
+  (lambda (tree)
+    (define (count-odd-even-aux tree even-count odd-count)
+      (cond
+        [(null? tree) (list even-count odd-count)]
+        [(even? (car tree))
+         (count-odd-even-aux (cdr tree) (+ even-count 1) odd-count)]
+        [else
+         (count-odd-even-aux (cdr tree) even-count (+ odd-count 1))]))
+
+    (count-odd-even-aux tree 0 0)))
+
+;; <tree>:=()
+;;           :=(<total-odd>,<total-even>))
+
+
+;;Pruebas
+(display (count-odd-and-even '(2 4 6 8 10))) ;; Retorna (5 0), 5 pares y 0 impares
+(newline)
+(display (count-odd-and-even '(1 3 5 6 7 8 0))) ;; Retorna (3 4), 3 pares y 4 impares
+(newline)
+(display (count-odd-and-even '()));; Retorna (0 0) ya que el árbol está vacio
+(newline)
+
+
 
 ;Punto 16
 ;En este caso se nos entrega una gramatica que tiene como función recibir parametros
