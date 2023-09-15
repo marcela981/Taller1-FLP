@@ -326,6 +326,20 @@
 (newline)
 (newline)
 
+;; Punto 14
+;; se requiere crear una función llamada path que tome como entrada un número n y un árbol binario de búsqueda (BST) representado como una lista.
+;; La función debe devolver una lista que represente la ruta desde la raíz del BST hasta el nodo que contiene el número n.
+;; La ruta debe indicarse utilizando las cadenas "left" y "right". Si el número n se encuentra en el nodo raíz, la función debe devolver una lista vacía.
+(define (path n bst)
+  (define (path-helper n bst path-so-far)
+    (cond
+      ((null? bst) '()) ; Si el árbol está vacío, retornamos una lista vacía (no se encontró el número n)
+      ((= n (car bst)) path-so-far) ; Si encontramos el número n en el nodo actual, retornamos la ruta hasta aquí
+      ((< n (car bst))
+       (path-helper n (cadr bst) (append path-so-far '(left)))) ; Si n es menor, seguimos por la izquierda y agregamos "left" a la ruta
+      ((> n (car bst))
+       (path-helper n (caddr bst) (append path-so-far '(right)))))) ; Si n es mayor, seguimos por la derecha y agregamos "right" a la ruta
+  (path-helper n bst '())) ; Llamamos a la función auxiliar con una ruta inicial vacía
 
 ;;Punto 15
 ;; <tree> -> <pair>
