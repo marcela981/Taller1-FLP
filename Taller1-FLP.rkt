@@ -157,20 +157,23 @@
 ;;.
 (define (inversions L)
   (define inv-count 0)
+   ;; Esta variable almacena el número total de inversiones en la lista.
   
   (define (count-inversions x xs)
+  ;; Función auxiliar que cuenta el número de inversiones que involucran al elemento `x` en la lista `xs`.
     (if (null? xs)
         0
         (+ (if (< x (car xs)) 0 1) (count-inversions x (cdr xs)))))
     
-  (define (count-inversions-list L)
+  (define (count-inversions-list L)  ;;   Función auxiliar que cuenta el número total de inversiones en la lista L.
     (if (null? L)
         0
         (+ (count-inversions (car L) (cdr L))
            (count-inversions-list (cdr L)))))
   
   
-  (set! inv-count (count-inversions-list L))
+  (set! inv-count (count-inversions-list L)) ;; Calcula el número total de inversiones en la lista L y lo almacena en `inv-count`.
+ 
   
  
   inv-count)
@@ -217,6 +220,10 @@
 (define filter-acum
   (lambda(a b f acum filter)
     (define (iter i acc)
+    ;; iter :
+    ;; Propósito:
+    ;; Esta función auxiliar toma un valor entero i y un acumulador 'acc', y realiza la acumulación iterativa de `i`
+    ;;   en 'acc' mientras `i` esté en el rango [a, b] y cumpla con el filtro especificado por la función filter.
     (if (> i b)
         acc
         (iter (+ i 1)
@@ -225,7 +232,7 @@
                   acc))))
   
   (iter a acum)))
-
+;; Se llama a iter inicialmente con los valores a y acum para comenzar el proceso de iteración y acumulación
 
 ;; Pruebas
 (display (filter-acum 1 15 + 0 even?)) ; Retorna 56
@@ -272,6 +279,9 @@
 (define count-odd-and-even
   (lambda (tree)
     (define (count-odd-even-aux tree even-count odd-count)
+    ;; Propósito:
+    ;; Función auxiliar que cuenta la cantidad de números pares e impares en un árbol.
+    ;; Utiliza dos contadores, even-count para pares y odd-count para impares.
       (cond
         [(null? tree) (list even-count odd-count)]
         [(even? (car tree))
@@ -280,6 +290,7 @@
          (count-odd-even-aux (cdr tree) even-count (+ odd-count 1))]))
 
     (count-odd-even-aux tree 0 0)))
+    ;;   ;; Llamada inicial a la función auxiliar con contadores iniciales en 0. (count-odd-even-aux tree 0 0))
 
 ;; <tree>:=()
 ;;           :=(<total-odd>,<total-even>))
